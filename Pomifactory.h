@@ -77,6 +77,8 @@ class Pomifactory {
             std::uint32_t highscore_b;
         };
         
+        static void loaderScreen();
+        
         static inline void limitFPS(std::uint8_t fps) {
             std::uint32_t wait = _time_last_frame + 1000;
             do {
