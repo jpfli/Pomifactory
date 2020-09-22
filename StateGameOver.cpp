@@ -30,10 +30,12 @@ void StateGameOver::enter() {
     }
     
     if(_cookie_found) {
+        if(_gameover_menu.selected() < 0) _gameover_menu.setSelected(0);
         _gameover_menu.show(Pomifactory::graphics());
     }
     else {
         // No cookie found. Ask if one should be created
+        if(_cookie_menu.selected() < 0) _cookie_menu.setSelected(0);
         _cookie_menu.show(Pomifactory::graphics());
     }
 }
@@ -49,12 +51,9 @@ void StateGameOver::leave() {
 
 void StateGameOver::update() {
     MenuBox<2>& menubox = _cookie_found ? _gameover_menu : _cookie_menu;
-    std::uint8_t selected = (menubox.selected() < 2) ? menubox.selected() : 0;
+    std::uint8_t selected = menubox.selected();
     
-    if(Pomi::Input::pressed(Pomi::Input::Button::A)) {
-        menubox.setHighlighted(selected);
-    }
-    else if(menubox.highlighted() < 2) {
+    if(menubox.highlighted() >= 0) {
         if(Pomi::Input::released(Pomi::Input::Button::A)) {
             menubox.setHighlighted(-1);
             
@@ -62,31 +61,30 @@ void StateGameOver::update() {
                 if(selected == 0) {
                     StatePlayGame::instance().init(Pomifactory::gameInfo().mode());
                     Pomifactory::changeState(&StatePlayGame::instance());
-                }
-                else {
-                    Pomifactory::changeState(&StateMenu::instance());
+                    return;
                 }
             }
             else {
                 if(selected == 0) {
-                    // Create new cookie
+                    // Create new cookie and save highscore
                     Pomifactory::saveCookie();
                 }
-                Pomifactory::changeState(&StateMenu::instance());
             }
             
+            Pomifactory::changeState(&StateMenu::instance());
             return;
         }
     }
     else {
-        if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
-            if(selected > 0) {
-                selected = 0;
-            }
+        if(Pomi::Input::pressed(Pomi::Input::Button::A)) {
+            menubox.setHighlighted(selected);
         }
-        if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
-            if(selected < 1) {
-                selected = 1;
+        else {
+            if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
+                selected = (selected - 1) >= 0 ? (selected - 1) : 1;
+            }
+            else if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
+                selected = (selected + 1) < 2 ? (selected + 1) : 0;
             }
         }
     }
