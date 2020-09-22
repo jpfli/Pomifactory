@@ -4,7 +4,6 @@
 #pragma once
 
 #include <cstdint>
-#include <cstdlib>
 #include "hw/Eeprom.h"
 
 namespace Pomi {
