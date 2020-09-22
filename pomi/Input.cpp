@@ -12,13 +12,15 @@ std::uint8_t Input::_prev_states(0);
 std::uint8_t Input::_last_btn(0);
 std::uint32_t Input::_time_next_repeat(0);
 
-void Input::update() {
-    std::uint32_t now = System::currentTimeMillis();
-    
+void Input::update(std::uint32_t now) {
     _prev_states = _states;
-    _states = (Buttons::left() ? Button::LEFT : 0) | (Buttons::right() ? Button::RIGHT : 0) | 
-              (Buttons::up() ? Button::UP : 0) | (Buttons::down() ? Button::DOWN : 0) | 
-              (Buttons::a() ? Button::A : 0) | (Buttons::b() ? Button::B : 0) | (Buttons::c() ? Button::C : 0);
+    _states = (Buttons::left() ? Button::LEFT : 0) |
+              (Buttons::right() ? Button::RIGHT : 0) |
+              (Buttons::up() ? Button::UP : 0) |
+              (Buttons::down() ? Button::DOWN : 0) |
+              (Buttons::a() ? Button::A : 0) |
+              (Buttons::b() ? Button::B : 0) |
+              (Buttons::c() ? Button::C : 0);
     
     std::uint8_t pressed = _states & (~_prev_states);
     
@@ -26,7 +28,9 @@ void Input::update() {
     if(pressed != 0) { // New button was pressed
         // Find out which button was pressed and save it in _last_btn
         _last_btn = 1;
-        while((pressed & _last_btn) == 0) _last_btn <<= 1;
+        while((pressed & _last_btn) == 0) {
+            _last_btn <<= 1;
+        }
         
         // Set the time when button starts automatically repeating
         _time_next_repeat = now + REPEAT_DELAY;
