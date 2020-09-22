@@ -25,8 +25,14 @@ class Core {
         
         static inline unsigned int sysTickMillis() {
             volatile unsigned int* SYSTICK = reinterpret_cast<unsigned int*>(0xe000e010);
-            // return ((SYSTICK[1] - SYSTICK[2]) * 699) >> 25; // Divide by 48000 (OSCT = 0)
+            // return (((SYSTICK[1] - SYSTICK[2]) >> 7) * 89478) >> 25; // Divide by 48000 (OSCT = 0)
             return (((SYSTICK[1] - SYSTICK[2]) >> 7) * 59652) >> 25; // Divide by 72000 (OSCT = 2)
+        }
+        
+        static inline unsigned int sysTickMicros() {
+            volatile unsigned int* SYSTICK = reinterpret_cast<unsigned int*>(0xe000e010);
+            // return (((SYSTICK[1] - SYSTICK[2]) >> 7) * 87381) >> 15; // Divide by 48 (OSCT = 0)
+            return (((SYSTICK[1] - SYSTICK[2]) >> 7) * 58254) >> 15; // Divide by 72 (OSCT = 2)
         }
         
         static inline void enableDAC() {
@@ -63,15 +69,24 @@ class Core {
             SYSCON[32] |= (number == 0) ? (1 << 9) : (1 << 10); // Enable clock for the timer
             
             volatile unsigned int* TIMER = reinterpret_cast<unsigned int*>((number == 0) ? 0x40014000 : 0x40018000);
-            TIMER[1] = 1 << 1;                                  // Reset timer
+            TIMER[1] = 1 << 1;                                  // Reset and disable timer counters
             TIMER[6 + matchnum] = clockFrequency() / frequency; // Set match value (timer's duration)
             TIMER[5] |= 1 << (3 * matchnum);                    // Generate interrupt when timer equals match value
             TIMER[5] |= 1 << (3 * matchnum + 1);                // Reset timer on match
             TIMER[1] = 1 << 0;                                  // Enable the timer counter
             
             // Enable timer interrupt
-            volatile unsigned int* NVIC = reinterpret_cast<unsigned int*>(0xe000e100);
-            NVIC[0] = (number == 0) ? (1 << 18) : (1 << 19);
+            volatile unsigned int* NVIC_ISER0 = reinterpret_cast<unsigned int*>(0xe000e100);
+            *NVIC_ISER0 = (number == 0) ? (1 << 18) : (1 << 19);
+        }
+        
+        static inline void disableTimer(unsigned int number) {
+            // Disable timer interrupt
+            volatile unsigned int* NVIC_ICER0 = reinterpret_cast<unsigned int*>(0xe000e180);
+            *NVIC_ICER0 = (number == 0) ? (1 << 18) : (1 << 19);
+            
+            volatile unsigned int* TIMER = reinterpret_cast<unsigned int*>((number == 0) ? 0x40014000 : 0x40018000);
+            TIMER[1] = 1 << 1;                                  // Reset and disable timer counters
         }
         
         static inline void enableIRQ() {
