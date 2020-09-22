@@ -20,7 +20,7 @@ class MenuBox {
         MenuBox(const MenuBox&) = delete;
         MenuBox& operator =(const MenuBox&) = delete;
         
-        std::uint8_t selected() const { return _selected_idx; }
+        std::int8_t selected() const { return _selected_idx; }
         void setSelected(std::uint8_t idx) {
             if(_selected_idx != idx) {
                 _selected_idx = idx;
@@ -28,7 +28,7 @@ class MenuBox {
             }
         }
         
-        std::uint8_t highlighted() const { return _highlighted_idx; }
+        std::int8_t highlighted() const { return _highlighted_idx; }
         void setHighlighted(std::uint8_t idx) {
             if(_highlighted_idx != idx) {
                 _highlighted_idx = idx;
@@ -56,6 +56,10 @@ class MenuBox {
         inline void hide(Pomi::Graphics& gfx) const {
             std::uint32_t h = 16 + 4 + 11 * Size;
             gfx.drawImage(Pomifactory::backgroundImage(), _x, _y, _width, h, _x, _y);
+        }
+        
+        inline void touch() {
+            _dirty = true;
         }
         
         inline void draw(Pomi::Graphics& gfx) {
@@ -91,6 +95,6 @@ class MenuBox {
         const std::uint32_t _width;
         
         bool _dirty;
-        std::uint8_t _selected_idx;
-        std::uint8_t _highlighted_idx;
+        std::int8_t _selected_idx;
+        std::int8_t _highlighted_idx;
 };
