@@ -71,7 +71,7 @@ void Pomifactory::run(State* state) {
     loaderScreen();
     
     Mixer::init(11025);
-    Mixer::setVolume(181);
+    Mixer::setVolume(128);
     
     changeState(state);
     
