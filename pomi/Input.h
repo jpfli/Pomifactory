@@ -16,7 +16,7 @@ class Input {
         Input(const Input&) = delete;
         Input& operator =(const Input&) = delete;
         
-        static void update();
+        static void update(std::uint32_t now);
         
         static inline bool held(std::uint8_t buttons) { return (_states & buttons) != 0; }
         static inline bool pressed(std::uint8_t buttons) { return (_states & (~_prev_states) & buttons) != 0; }
