@@ -20,28 +20,25 @@ void StatePauseGame::leave() {
 void StatePauseGame::update() {
     Pomi::Graphics& gfx = Pomifactory::graphics();
     
-    std::uint8_t selected = (_menubox.selected() < 2) ? _menubox.selected() : 0;
+    std::uint8_t selected = _menubox.selected();
     
-    if(Pomi::Input::pressed(Pomi::Input::Button::A)) {
-        _menubox.setHighlighted(selected);
-    }
-    else if(_menubox.highlighted() < 2) {
+    if(_menubox.highlighted() >= 0) {
         if(Pomi::Input::released(Pomi::Input::Button::A)) {
             _menubox.setHighlighted(-1);
-            
             Pomifactory::changeState((selected == 0) ? static_cast<State*>(&StatePlayGame::instance()) : static_cast<State*>(&StateMenu::instance()));
             return;
         }
     }
     else {
-        if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
-            if(selected > 0) {
-                selected = 0;
-            }
+        if(Pomi::Input::pressed(Pomi::Input::Button::A)) {
+            _menubox.setHighlighted(selected);
         }
-        if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
-            if(selected < 1) {
-                selected = 1;
+        else {
+            if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
+                selected = (selected - 1) >= 0 ? (selected - 1) : 1;
+            }
+            else if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
+                selected = (selected + 1) < 2 ? (selected + 1) : 0;
             }
         }
     }
