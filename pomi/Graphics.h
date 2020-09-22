@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include "hw/Display.h"
-#include "System.h"
 
 namespace Pomi {
 
@@ -35,6 +34,7 @@ class Graphics {
         void clear(std::uint8_t color);
         
         void drawPixel(std::int32_t x, std::int32_t y, std::uint8_t color);
+        
         void drawHLine(std::int32_t x, std::int32_t y, std::int32_t w, std::uint8_t color);
         void drawVLine(std::int32_t x, std::int32_t y, std::int32_t h, std::uint8_t color);
         
@@ -44,8 +44,12 @@ class Graphics {
         inline void drawImage(const std::uint8_t* bitmap, std::int32_t x, std::int32_t y, bool flip_x = false, bool flip_y = false) {
             drawImage(bitmap, 0, 0, bitmap[0], bitmap[1], x, y, flip_x, flip_y);
         }
-        
         void drawImage(const std::uint8_t* bitmap, std::int32_t x_src, std::int32_t y_src, std::int32_t w, std::int32_t h, std::int32_t x_dst, std::int32_t y_dst, bool flip_x = false, bool flip_y = false);
+        
+        inline void drawImage1BPP(const std::uint8_t* bitmap, std::uint8_t color, std::int32_t x, std::int32_t y, bool flip_x = false, bool flip_y = false) {
+            drawImage1BPP(bitmap, color, 0, 0, bitmap[0], bitmap[1], x, y, flip_x, flip_y);
+        }
+        void drawImage1BPP(const std::uint8_t* bitmap, std::uint8_t color, std::int32_t x_src, std::int32_t y_src, std::int32_t w, std::int32_t h, std::int32_t x_dst, std::int32_t y_dst, bool flip_x = false, bool flip_y = false);
         
         void print(const char* text, std::uint8_t color);
         void print(const char* text, std::int32_t x, std::int32_t y, std::uint8_t color);
