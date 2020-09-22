@@ -8,10 +8,20 @@
 StateMenu StateMenu::_instance;
 
 void StateMenu::enter() {
+    std::int8_t vol = _menu_labels[2][5] - '0';
+    if(vol < 0 || vol > 7) {
+        constexpr std::uint32_t VOLUME = 4000;
+        vol = Pomi::Hw::Eeprom::read(VOLUME) >> 5;
+        _menu_labels[2][5] = '0' + vol;
+        
+        _setVolume(vol);
+    }
+    
     Pomi::Graphics& gfx = Pomifactory::graphics();
     
     gfx.drawImage(Pomifactory::backgroundImage(), 0, 0);
     
+    if(_menubox.selected() < 0) _menubox.setSelected(0);
     _menubox.show(gfx);
     
     // Load highscores from a cookie if there is one
@@ -38,12 +48,9 @@ void StateMenu::leave() {
 void StateMenu::update() {
     Pomi::Graphics& gfx = Pomifactory::graphics();
     
-    std::uint8_t selected = (_menubox.selected() < 2) ? _menubox.selected() : 0;
+    std::int8_t selected = _menubox.selected();
     
-    if(Pomi::Input::pressed(Pomi::Input::Button::A)) {
-        _menubox.setHighlighted(selected);
-    }
-    else if(_menubox.highlighted() < 2) {
+    if(_menubox.highlighted() >= 0) {
         if(Pomi::Input::released(Pomi::Input::Button::A)) {
             _menubox.setHighlighted(-1);
             
@@ -54,14 +61,34 @@ void StateMenu::update() {
         }
     }
     else {
-        if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
-            if(selected > 0) {
-                selected = 0;
-            }
+        if(selected < 2 && Pomi::Input::pressed(Pomi::Input::Button::A)) {
+            _menubox.setHighlighted(selected);
         }
-        else if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
-            if(selected < 1) {
-                selected = 1;
+        else {
+            if(selected == 2) {
+                std::int8_t vol = _menu_labels[2][5] - '0';
+                if(Pomi::Input::pressed(Pomi::Input::Button::LEFT)) {
+                    vol = (vol - 1) > 0 ? vol - 1 : 0;
+                }
+                else if(Pomi::Input::pressed(Pomi::Input::Button::RIGHT)) {
+                    vol = (vol + 1) < 7 ? vol + 1 : 7;
+                }
+                
+                if(vol != _menu_labels[2][5] - '0') {
+                    _menu_labels[2][5] = '0' + vol;
+                    _menubox.touch();
+                    
+                    _setVolume(vol);
+                    
+                    _points_snd.play();
+                }
+            }
+            
+            if(Pomi::Input::pressed(Pomi::Input::Button::UP)) {
+                selected = (selected - 1) >= 0 ? (selected - 1) : 2;
+            }
+            else if(Pomi::Input::pressed(Pomi::Input::Button::DOWN)) {
+                selected = (selected + 1) < 3 ? (selected + 1) : 0;
             }
         }
     }
